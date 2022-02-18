@@ -39,11 +39,7 @@ int main(int argc, char **argv) {
     tasks.Init();
     tasks.Run();
     tasks.Join();
-    
     tasks.Stop();
-    
-    //tasks.Run();
-
     return 0;
 }
 

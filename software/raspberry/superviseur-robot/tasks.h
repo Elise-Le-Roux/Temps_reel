@@ -66,6 +66,9 @@ private:
     ComRobot robot;
     int robotStarted = 0;
     int move = MESSAGE_ROBOT_STOP;
+    int wdmode = 0; // 0 : without WD and 1 : with WD
+    int nblostmessage = 0; // number of messages lost between the supervisor and the robot
+    int resetcom = 1;
     
     /**********************************************************************/
     /* Tasks                                                              */
@@ -75,7 +78,12 @@ private:
     RT_TASK th_receiveFromMon;
     RT_TASK th_openComRobot;
     RT_TASK th_startRobot;
+    RT_TASK th_startRobotWithWD;
+    RT_TASK th_ResetWD;
+    RT_TASK th_checkBatteryRobot;
     RT_TASK th_move;
+    RT_TASK th_CloseAll;
+    RT_TASK th_ConnectionLostRobot;
     
     /**********************************************************************/
     /* Mutex                                                              */
@@ -83,15 +91,22 @@ private:
     RT_MUTEX mutex_monitor;
     RT_MUTEX mutex_robot;
     RT_MUTEX mutex_robotStarted;
+    RT_MUTEX mutex_wdmode;
     RT_MUTEX mutex_move;
+    RT_MUTEX mutex_messagelostrobot;
+    RT_MUTEX mutex_resetcom;
+
 
     /**********************************************************************/
     /* Semaphores                                                         */
     /**********************************************************************/
+    RT_SEM sem_startServer;
     RT_SEM sem_barrier;
     RT_SEM sem_openComRobot;
     RT_SEM sem_serverOk;
     RT_SEM sem_startRobot;
+    RT_SEM sem_startRobotWithWD;
+    RT_SEM sem_closeAll;
 
     /**********************************************************************/
     /* Message queues                                                     */
@@ -128,9 +143,34 @@ private:
     void StartRobotTask(void *arg);
     
     /**
+     * @brief Thread starting the communication with the robot with a watchdog.
+     */
+    void StartRobotWithWDTask(void *arg);
+    
+    /**
+     * @brief Reset the wathdog if robot started with wd.
+     */
+    void ResetWD(void *arg);
+    
+    /**
+     * @brief Thread starting the checking battery state.
+     */
+    void CheckBatteryRobot(void *arg);
+    
+    /**
+     * @brief Thread stopping stuff when communication with monitor is lost.
+     */
+    void CloseAll(void *arg);
+    
+    /**
      * @brief Thread handling control of the robot.
      */
     void MoveTask(void *arg);
+    
+    /**
+     * @brief Thread handling if the connection with the robot is lost
+     */
+    void ConnectionLostRobot(void *arg);
     
     /**********************************************************************/
     /* Queue services                                                     */
